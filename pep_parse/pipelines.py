@@ -13,7 +13,7 @@ class PepParsePipeline:
 
     def process_item(self, item, spider):
         status = item['status']
-        self.status_dict[status] += 1
+        self.status_dict[status] = self.status_dict.get(status, 0) + 1
         return item
 
     def close_spider(self, spider):

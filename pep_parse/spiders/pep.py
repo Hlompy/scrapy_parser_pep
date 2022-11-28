@@ -1,6 +1,9 @@
+import re
 import scrapy
 
-from ..items import PepParseItem
+from pep_parse.items import PepParseItem
+
+REG_EXPR = r'PEP\s(?P<number>\d+)\W+(?P<name>.+)$'
 
 
 class PepSpider(scrapy.Spider):
@@ -14,10 +17,11 @@ class PepSpider(scrapy.Spider):
             yield response.follow(pep_link, callback=self.parse_pep)
 
     def parse_pep(self, response):
-        h1 = response.css('h1.page-title::text')
+        h1 = response.css('h1.page-title::text').get()
+        number, name = re.search(REG_EXPR, h1).groups()
         data = {
-            'number': int(h1.get().split('–')[0].split()[1]),
-            'name': h1.get().split('–')[1],
+            'number': number,
+            'name': name,
             'status': response.css('dt:contains("Status") + dd::text').get(),
         }
         yield PepParseItem(data)
